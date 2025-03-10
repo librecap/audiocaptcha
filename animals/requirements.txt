@@ -1,0 +1,7 @@
+torch>=2.6.0
+diffusers>=0.32.2
+transformers>=4.49.0
+accelerate>=1.4.0
+pydub>=0.25.1
+numpy>=2.2.3
+scipy>=1.15.2
