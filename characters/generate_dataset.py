@@ -9,6 +9,7 @@ from pydub import AudioSegment
 
 def generate_audio_captchas():
     """Generate audio captchas for numbers 0-9 and letters a-z in multiple languages"""
+    output_path = os.path.join(os.path.dirname(__file__), "characters.pkl")
 
     numbers = {
         "0": {
@@ -220,7 +221,6 @@ def generate_audio_captchas():
             except Exception as e:
                 print(f"Error generating audio for {char} in {lang_code}: {e}")
 
-    output_path = os.path.join(os.path.dirname(__file__), "characters.pkl")
     with open(output_path, "wb") as f:
         pickle.dump(audio_data, f)
 
