@@ -633,7 +633,7 @@ if __name__ == "__main__":
     except FileNotFoundError as e:
         print(f"Error: {e}")
         print(
-            "Make sure to run generate_characters.py first to create the character audio samples."
+            "There is no character audio samples. Run generate_characters.py first."
         )
     except ValueError as e:
         print(f"Error: {e}")

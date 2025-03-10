@@ -14,10 +14,23 @@ from scipy.io.wavfile import write as write_wav
 from pydub import AudioSegment
 
 
+def get_batch_size():
+    """Get the optimal batch size for the current GPU"""
+    if torch.cuda.is_available():
+        gpu_mem = torch.cuda.get_device_properties(0).total_memory / (1024**3)
+        if gpu_mem > 16:
+            return 5
+
+        if gpu_mem > 8:
+            return 4
+
+    return 2
+
+
 def generate_animal_captchas(
-    clips_per_animal=20,
-    clip_duration=3,
-    batch_size=2,
+    clips_per_animal=100,
+    clip_duration=5,
+    batch_size=None,
     num_workers=None,
 ):
     """
@@ -31,6 +44,9 @@ def generate_animal_captchas(
     """
     start_time = time.time()
     output_path = os.path.join(os.path.dirname(__file__), "animals.pkl")
+
+    if batch_size is None:
+        batch_size = get_batch_size()
 
     if num_workers is None:
         num_workers = max(1, multiprocessing.cpu_count() - 1)
@@ -269,23 +285,7 @@ def generate_animal_captchas(
     return audio_data
 
 
-def get_batch_size():
-    """Get the optimal batch size for the current GPU"""
-    if not torch.cuda.is_available():
-        return 2
-
-    gpu_mem = torch.cuda.get_device_properties(0).total_memory / (1024**3)
-    if gpu_mem > 16:
-        return 5
-
-    if gpu_mem > 8:
-        return 4
-
-    return 2
-
-
 if __name__ == "__main__":
-    BATCH_SIZE = get_batch_size()
     generate_animal_captchas(
-        clips_per_animal=20, clip_duration=3, batch_size=BATCH_SIZE
+        clips_per_animal=1000
     )
