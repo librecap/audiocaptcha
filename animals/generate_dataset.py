@@ -276,10 +276,10 @@ def get_batch_size():
 
     gpu_mem = torch.cuda.get_device_properties(0).total_memory / (1024**3)
     if gpu_mem > 16:
-        return 4
+        return 5
 
     if gpu_mem > 8:
-        return 3
+        return 4
 
     return 2
 
