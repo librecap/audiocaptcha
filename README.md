@@ -5,7 +5,7 @@ Generate highly secure, accessible audio CAPTCHAs. Human recognizable but bot-re
 ## Quick Start
 
 ```bash
-git clone https://github.com/tn3w/audiocaptcha.git
+git clone https://github.com/librecap/audiocaptcha.git
 cd audiocaptcha/characters
 python -m venv venv
 source venv/bin/activate
@@ -44,7 +44,7 @@ This is a Prove of Concept implementation intended to be used for a Rust impleme
 ## Installation
 
 ```bash
-git clone https://github.com/tn3w/audiocaptcha.git
+git clone https://github.com/librecap/audiocaptcha.git
 cd audiocaptcha/characters
 python -m venv venv
 source venv/bin/activate
@@ -84,7 +84,7 @@ To set up the development environment:
 
 ```bash
 # Clone the repository
-git clone https://github.com/tn3w/audiocaptcha.git
+git clone https://github.com/librecap/audiocaptcha.git
 cd audiocaptcha
 
 # Choose a captcha type
