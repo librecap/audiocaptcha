@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 
+import re
 import os
 import io
 import pickle
 import random
+import tarfile
+import glob
 from functools import lru_cache
+from pathlib import Path
 from pydub import AudioSegment
 
 
@@ -67,6 +71,68 @@ def batch_mix_audio(base_audio, segments_with_positions):
 
     return result
 
+def load_pickle(file_path: str) -> dict:
+    with open(file_path, "rb") as file_stream:
+        return pickle.load(file_stream)
+
+def unsplit(file_path: str) -> dict:
+    """
+    Unsplit a audio file when it is split into multiple files.
+    """
+
+    if os.path.isfile(file_path):
+        return load_pickle(file_path)
+
+    original_path = Path(file_path)
+
+    name = original_path.stem
+    ext = original_path.suffix
+    directory = original_path.parent
+
+    pattern = str(directory / f"{name}[0-9]*{ext}")
+    chunks = glob.glob(pattern)
+
+    if not chunks:
+        print(f"Error: No chunks found matching pattern '{pattern}'")
+        return False
+
+    def chunk_number(chunk_path):
+        match = re.search(f"{name}([0-9]+){ext}$", os.path.basename(chunk_path))
+        return int(match.group(1)) if match else -1
+
+    chunks.sort(key=chunk_number)
+
+    temp_tar_path = directory / f"{name}_reconstructed.tar.gz"
+
+    try:
+        print(f"Reassembling {len(chunks)} chunks into {temp_tar_path}...")
+
+        with open(temp_tar_path, "wb") as outfile:
+            for i, chunk_path in enumerate(chunks):
+                print(f"Processing chunk {i+1}/{len(chunks)}: {chunk_path}")
+                with open(chunk_path, "rb") as infile:
+                    outfile.write(infile.read())
+
+        print("Extracting the original file from the compressed archive...")
+
+        with tarfile.open(temp_tar_path, "r:gz") as tar:
+            members = tar.getmembers()
+
+            if not members:
+                print("Error: No files found in the tar archive.")
+                return False
+
+            tar.extractall(path=directory)
+
+            extracted_files = [member.name for member in members]
+            print(f"Successfully extracted: {', '.join(extracted_files)}")
+
+        return load_pickle(file_path)
+
+    finally:
+        if temp_tar_path.exists():
+            os.remove(temp_tar_path)
+            print(f"Removed temporary compressed file: {temp_tar_path}")
 
 def generate_combined_captcha(language="en", output_format="mp3", count=5):
     """
@@ -97,16 +163,10 @@ def generate_combined_captcha(language="en", output_format="mp3", count=5):
             f"Number audio file not found: {numbers_path}. Run generate_audio_captchas.py first."
         )
 
-    if not os.path.exists(music_path):
-        raise FileNotFoundError(
-            f"Music samples file not found: {music_path}. Run generate_music_captchas.py first."
-        )
-
     with open(numbers_path, "rb") as f:
         numbers_data = pickle.load(f)
 
-    with open(music_path, "rb") as f:
-        music_data = pickle.load(f)
+    music_data = unsplit(music_path)
 
     number_samples = []
     for num in range(1, count + 1):
